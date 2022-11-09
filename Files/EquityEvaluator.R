@@ -1,4 +1,4 @@
-# This is version 5
+# This is version 8.  For the most up to date version, go here: https://github.com/LookHere/EquityEvaluator
 
 library(shiny)
 library(ggplot2)
@@ -35,96 +35,94 @@ HistoryAllEquity <- data.frame(DaysAll)
 rm(DaysAll)
 
 
-#### Creates a function that creates a dataframe of a grant's vesting and integrate that into the HistoryAllEquity 
+#### Creates a function that creates temporary dataframe of one specific grant's vesting and integrate that into the HistoryAllEquity 
+
+g = 1 # temporary placeholder for which grant this will process
 
 # Builds a dataframe "HistoryTemp" for every day between the grant issuance and 10 years after the last grant
-DaysAll <- seq(GrantInfo$GrantDate[1],LatestDate, by = "1 day")
+DaysAll <- seq(GrantInfo$GrantDate[g],LatestDate, by = "1 day")
 HistoryTemp <- data.frame(DaysAll)
 
 # Defaults all rows to the final amount of 100% vested.  
 # (This way all we need to do is fix the days that have some unvested amounts)
-HistoryTemp$Vested <- GrantInfo$GrantUnits[1]
+HistoryTemp$Vested <- GrantInfo$GrantUnits[g]
 HistoryTemp$Unvested <- 0
 
 # Set a variable that holds the vest per month
-VestPerMonth <- GrantInfo$GrantUnits[1] / GrantInfo$GrantPeriodM[1]
+VestPerMonth <- GrantInfo$GrantUnits[g] / GrantInfo$GrantPeriodM[g]
 
 # Set a variable that will hold the current date to change
-DayChange <- GrantInfo$GrantDate[1]
+DayChange <- GrantInfo$GrantDate[g] ## are we using this?????????????????????????????
 
-# find how many days of cliff vesting
-
-
-# zero's out the vested and 100%'s the unvest for the entire cliff
-
-#DaysAll <- seq(GrantInfo$GrantDate[1],LatestDate, by = "1 day")
-#HistoryTemp <- data.frame(DaysAll)
 
 # Find out how many days of cliff there is (doing it by days to avoid leap year issues)
 
 # Turn the grant start date into POSIXlt so we can manipulate it
-CliffEndDate <- as.POSIXlt(GrantInfo$GrantDate[1])
+CliffEndDate <- as.POSIXlt(GrantInfo$GrantDate[g])
 # Add the months of the cliff
-CliffEndDate$mon <-   CliffEndDate$mon + GrantInfo$GrantCliffM[1]
+CliffEndDate$mon <-   CliffEndDate$mon + GrantInfo$GrantCliffM[g]
 # Find out the number of days of cliff by subtracting cliff end by grant start
-DaysOfCliff <- as.Date(CliffEndDate) - GrantInfo$GrantDate[1]
+DaysOfCliff <- as.Date(CliffEndDate) - GrantInfo$GrantDate[g]
 
-# Set those number of days to 0% vested, 100% unvested
+# Set those number of days before the cliff to 0% vested, 100% unvested
 HistoryTemp$Vested[1:DaysOfCliff] <- 0
-HistoryTemp$Unvested[1:DaysOfCliff] <- GrantInfo$GrantUnits[1]
+HistoryTemp$Unvested[1:DaysOfCliff] <- GrantInfo$GrantUnits[g]
 
 
-# have the cliff vest amount on the first day after the vesting is done
+'
+# Vest the all of the units from the cliff on the day after the cliff is done.  The unvested units is the opposite of this.
+HistoryTemp$Vested[DaysOfCliff +1] <- GrantInfo$GrantUnits[g] * (GrantInfo$GrantCliffM[g] / GrantInfo$GrantPeriodM[g])
+HistoryTemp$Unvested[DaysOfCliff +1] <- GrantInfo$GrantUnits[g] * (1- (GrantInfo$GrantCliffM[g] / GrantInfo$GrantPeriodM[g]))
+'
+
+# Variable to hold month currently being processed (starts with month after vest)
+TempMonth <- GrantInfo$GrantCliffM[g] + 1
+# Variables to hold how many units are vested and unvested after cliff
+TempVested <- GrantInfo$GrantUnits[g] * (GrantInfo$GrantCliffM[g] / GrantInfo$GrantPeriodM[g])
+TempUnvested <- GrantInfo$GrantUnits[g] * (1- (GrantInfo$GrantCliffM[g] / GrantInfo$GrantPeriodM[g]))
+
+# Default MStart to the first month after the cliff
+MStart <- as.POSIXlt(GrantInfo$GrantDate[g]) + (DaysOfCliff)
 
 
-HistoryTemp$Vested[1] <- 0
-HistoryTemp$Unvested[1] <- GrantInfo$GrantUnits[1]
+# Move units from unvested to vested every month
+while(TempMonth <= GrantInfo$GrantPeriodM[g]) {
+
+  # Identify the row that's the first day of the month we're changing
+  MStartRow <- as.Date(MStart) - GrantInfo$GrantDate[g] +1
+  
+  # Identify the row that's the last day of the month we're changing (add 1 month and subtract 1 day)
+  MEnd <- as.POSIXlt(MStart)
+  MEnd$mon <- MEnd$mon +1
+  #MEnd$mday <- MEnd$mday -1
+  MEndRow <- as.Date(MEnd) - GrantInfo$GrantDate[g]
+  
+  # Overwrite the current month with the updated vested and unvested numbers
+  HistoryTemp$Vested[MStartRow:MEndRow] <- TempVested
+  HistoryTemp$Unvested[MStartRow:MEndRow] <- TempUnvested
+  
+  
+  # Update the vested amounts for the next month
+  TempVested = TempVested + VestPerMonth
+  TempUnvested  = TempUnvested - VestPerMonth
+
+  
+  # Progress MStart to the next month
+  MStart <- as.POSIXlt.Date(GrantInfo$GrantDate[g])
+  MStart$mon <- MStart$mon + TempMonth
+  
+  
+  # Progress the month count
+  TempMonth <- TempMonth + 1    
+  
+}
+
+# Rename the columns based on the grant number
+colnames(HistoryTemp) <- c("DaysAll",  paste(g, " Grant Vested") , paste(g, " Grant Unvested"))
+
+# Merge the temporary dataframe into the HistoryAllEquity dataframe
+HistoryAllEquity <- merge(HistoryAllEquity, HistoryTemp, by.x = "DaysAll", by.y = "DaysAll")
 
 
-GrantCliffM
 
 
-
-
-LatestDateGrant <- as.POSIXlt(GrantInfo$GrantDate[1] )
-
-
-GrantInfo$GrantPeriodM[1] * 12
-
-LatestDateGrant$year <- LatestDateGrant$year+1  ## maybe we should change the 1 here to be a variable for vesting period
-LatestDateGrant <- as.Date(LatestDateGrant)
-
-VestingPeriod <- LatestDateGrant - GrantInfo$GrantDate[1] 
-VestingPerMonth <- GrantInfo$GrantUnits[1] / as.numeric(VestingPeriod / 12)
-
-
-# Names the columns based on the grant number
-
-
-
-# Puts this grant on the HistoryAllEquity dataframe
-
-#HistoryAllEquity
-
-# Deletes the dataframe
-
-# Delete the DaysAll list
-rm(DaysAll)
-
-
-
-
-GrantDate <- as.Date(c("2020/1/1", "2020/2/1","2020/3/1","2020/4/1","2020/5/1","2020/6/1", "2020/2/1","2020/3/1","2020/4/1","2020/5/1","2020/6/1","2020/7/1"))
-VestedUnits <- c(0, 0, 100, 200, 300, 400, 0, 0, 100, 200, 300, 400  )
-UnvestedType <- c(1000,1000,900,800,700,600, 1000,1000,900,800,700,600)
-GrantNumber <- c("Grant1","Grant1","Grant1","Grant1","Grant1","Grant1","Grant2","Grant2","Grant2","Grant2","Grant2","Grant2")
-
-History <- data.frame(GrantDate, VestedUnits, UnvestedType, GrantNumber)
-
-p <- ggplot(History, aes(x=GrantDate, y=VestedUnits, fill=GrantNumber))+ 
-  geom_area(position = 'stack')
-p + scale_fill_brewer(palette="Dark2") 
-p + theme(legend.position="bottom")
-
-
-## Build a slider under the graph.  The slider is the date of exit.  There is a line on the graph the just identifies the date of exit.  The slider also drives a table displays the vested/unvested as of that date
