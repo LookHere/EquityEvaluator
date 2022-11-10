@@ -1,4 +1,4 @@
-# This is version 11.  For the most up to date version, go here: https://github.com/LookHere/EquityEvaluator
+# This is version 12.  For the most up to date version, go here: https://github.com/LookHere/EquityEvaluator
 
 library(shiny)
 library(ggplot2)
@@ -7,119 +7,116 @@ setwd("D:/CompensationScience/CompDashboard")
 
 
 # Set up the user interface
-ui <- fluidPage(
-  titlePanel("Equity Evaluator"),
-  sidebarLayout(
-    sidebarPanel(
-      
-      helpText("When used live, this is data will be pulled from the employee's records."),
-      
-      h2("First Grant"),
-      fluidRow(
-        dateInput(inputId = "GrantDate01", h6("Grant Date"),
-                  value = "2018-01-01")),
-      fluidRow(
-        numericInput(inputId = "GrantUnits01", h6("Units Granted"), 
-                  value = 200)),
-#     fluidRow(
-#        numericInput(inputId = "GrantStrike01", h6("Strike Price"), 
-#                     value = 3)),
-      fluidRow(
-        sliderInput(inputId = "GrantPeriodM01", h6("Grant Period (months)"), 
-                    min = 0, max = 120, value = 48)),
-      fluidRow(
-        sliderInput(inputId = "GrantCliffM01", h6("Cliff Period (months)"), 
-                    min = 0, max = 120, value = 12)),
-      
-     h2("Second Grant"),
-     fluidRow(
-       dateInput(inputId ="GrantDate02", h6("Grant Date"),
-                 value = "2019-01-01")),
-     fluidRow(
-       numericInput(inputId = "GrantUnits02", h6("Units Granted"), 
-                    value = 200)),
-#     fluidRow(
-#       numericInput(inputId = "GrantStrike02", h6("Strike Price"), 
-#                    value = 3)),
-     fluidRow(
-       sliderInput(inputId = "GrantPeriodM02", h6("Grant Period (months)"), 
-                   min = 0, max = 120, value = 48)),
-     fluidRow(
-       sliderInput(inputId = "GrantCliffM02", h6("Cliff Period (months)"), 
-                   min = 0, max = 120, value = 12)),
-     
-     
-     h2("Third Grant"),
-     fluidRow(
-       dateInput(inputId ="GrantDate03", h6("Grant Date"),
-                 value = "2020-01-01")),
-     fluidRow(
-       numericInput(inputId = "GrantUnits03", h6("Units Granted"), 
-                    value = 200)),
-#     fluidRow(
-#       numericInput(inputId = "GrantStrike03", h6("Strike Price"), 
-#                    value = 3)),
-     fluidRow(
-       sliderInput(inputId = "GrantPeriodM03", h6("Grant Period (months)"), 
-                   min = 0, max = 120, value = 48)),
-     fluidRow(
-       sliderInput(inputId = "GrantCliffM03", h6("Cliff Period (months)"), 
-                   min = 0, max = 120, value = 12)),
-    ),
-    
-    mainPanel(
-      
-      # Output graph
-      plotOutput(outputId = "distPlot"),
-      
-      # Input slider for the date
-#      sliderInput(inputId = "Date",
-#                  label = "Exit Date",
-#                  min = 1,
-#                  max = 100,
-#                  value = 50),
-      
-      sliderInput(inputId = "bins",
-                  label = "Number of bins:",
-                  min = 1,
-                  max = 50,
-                  value = 30)
-      
-      
-      
-    )
-  )
-)
+# ui <- fluidPage(
+#   titlePanel("Equity Evaluator"),
+#   sidebarLayout(
+#     sidebarPanel(
+#       
+#       helpText("When used live, this is data will be pulled from the employee's records."),
+#       
+#       h2("First Grant"),
+#       fluidRow(
+#         dateInput(inputId = "GrantDate01", h6("Grant Date"),
+#                   value = "2018-01-01")),
+#       fluidRow(
+#         numericInput(inputId = "GrantUnits01", h6("Units Granted"), 
+#                   value = 200)),
+# #     fluidRow(
+# #        numericInput(inputId = "GrantStrike01", h6("Strike Price"), 
+# #                     value = 3)),
+#       fluidRow(
+#         sliderInput(inputId = "GrantPeriodM01", h6("Grant Period (months)"), 
+#                     min = 0, max = 120, value = 48)),
+#       fluidRow(
+#         sliderInput(inputId = "GrantCliffM01", h6("Cliff Period (months)"), 
+#                     min = 0, max = 120, value = 12)),
+#       
+#      h2("Second Grant"),
+#      fluidRow(
+#        dateInput(inputId ="GrantDate02", h6("Grant Date"),
+#                  value = "2019-01-01")),
+#      fluidRow(
+#        numericInput(inputId = "GrantUnits02", h6("Units Granted"), 
+#                     value = 200)),
+# #     fluidRow(
+# #       numericInput(inputId = "GrantStrike02", h6("Strike Price"), 
+# #                    value = 3)),
+#      fluidRow(
+#        sliderInput(inputId = "GrantPeriodM02", h6("Grant Period (months)"), 
+#                    min = 0, max = 120, value = 48)),
+#      fluidRow(
+#        sliderInput(inputId = "GrantCliffM02", h6("Cliff Period (months)"), 
+#                    min = 0, max = 120, value = 12)),
+#      
+#      
+#      h2("Third Grant"),
+#      fluidRow(
+#        dateInput(inputId ="GrantDate03", h6("Grant Date"),
+#                  value = "2020-01-01")),
+#      fluidRow(
+#        numericInput(inputId = "GrantUnits03", h6("Units Granted"), 
+#                     value = 200)),
+# #     fluidRow(
+# #       numericInput(inputId = "GrantStrike03", h6("Strike Price"), 
+# #                    value = 3)),
+#      fluidRow(
+#        sliderInput(inputId = "GrantPeriodM03", h6("Grant Period (months)"), 
+#                    min = 0, max = 120, value = 48)),
+#      fluidRow(
+#        sliderInput(inputId = "GrantCliffM03", h6("Cliff Period (months)"), 
+#                    min = 0, max = 120, value = 12)),
+#     ),
+#     
+#     mainPanel(
+#       
+#       # Output graph
+#       plotOutput(outputId = "distPlot"),
+#       
+#       # Input slider for the date
+# #      sliderInput(inputId = "Date",
+# #                  label = "Exit Date",
+# #                  min = 1,
+# #                  max = 100,
+# #                  value = 50),
+#       
+#       sliderInput(inputId = "bins",
+#                   label = "Number of bins:",
+#                   min = 1,
+#                   max = 50,
+#                   value = 30)
+#       
+#       
+#       
+#     )
+#   )
+# )
 
 
 
 
 # Define server logic required to draw a histogram ----
-server <- function(input, output) {
-  
-  HistoryAllEquity <- reactive({
-
-    ### Create a dataframe where we store the equity grant date, units, and vesting type (cliff or immediate)
-    
-    # In the UI out in a way to enter the grants
-"    
-    GrantDate <- as.Date(c(input$GrantDate01, input$GrantDate02, input$GrantDate03))
-    GrantUnits <- c(input$GrantUnits01, input$GrantUnits02, input$GrantUnits03)
-#    GrantStrike <- c(5, 10)
-    GrantPeriodM <- c(input$GrantPeriodM01, input$GrantPeriodM02, input$GrantPeriodM03)  # the grant period in months (including the vest)
-    GrantCliffM <- c(input$GrantCliffM01, input$GrantCliffM02, input$GrantCliffM03)     # the vest period in months
- "   
-    
+# server <- function(input, output) {
+#   
+#   HistoryAllEquity <- reactive({
+# 
+#     ### Create a dataframe where we store the equity grant date, units, and vesting type (cliff or immediate)
+#     
+#     # In the UI out in a way to enter the grants
+#     
+#     GrantDate <- as.Date(c(input$GrantDate01, input$GrantDate02, input$GrantDate03))
+#     GrantUnits <- c(input$GrantUnits01, input$GrantUnits02, input$GrantUnits03)
+# #    GrantStrike <- c(5, 10)
+#     GrantPeriodM <- c(input$GrantPeriodM01, input$GrantPeriodM02, input$GrantPeriodM03)  # the grant period in months (including the vest)
+#     GrantCliffM <- c(input$GrantCliffM01, input$GrantCliffM02, input$GrantCliffM03)     # the vest period in months
+#    
+#     
 
     GrantDate <- as.Date(c("2018-01-01", "2020-01-01", "2021-06-01"))
     GrantUnits <- c(1000, 200, 300)
     GrantPeriodM <- c(48, 12, 12)  # the grant period in months (including the vest)
     GrantCliffM <- c(12, 0, 0)     # the vest period in months
     
-    
-        
-    
-    
+
     GrantInfo <- data.frame(GrantDate, GrantUnits, GrantPeriodM, GrantCliffM)
     
     
@@ -130,7 +127,7 @@ server <- function(input, output) {
     
     # Find 10 years after the last grant (this will be the end of the dataframe)
     LatestDate <- as.POSIXlt(max(GrantInfo$GrantDate))
-    LatestDate$year <- LatestDate$year+10
+    LatestDate$year <- LatestDate$year+2
     LatestDate<- as.Date(LatestDate)
     
     # Builds a dataframe "HistoryAllEquity" for every day between the first grant and 10 years after the last grant
@@ -139,6 +136,11 @@ server <- function(input, output) {
     # Delete the DaysAll list
     rm(DaysAll)
     
+    # Mirrors HistoryAllEquity to create HistoryRunning for the charts
+    HistoryRunning <- HistoryAllEquity
+    HistoryRunning$Vested <- 0
+    HistoryRunning$Unvested <- 0
+    HistoryRunning$GrantNum <- 0
     
     #### Creates a function that creates temporary dataframe of one specific grant's vesting and integrate that into the HistoryAllEquity 
     
@@ -216,6 +218,15 @@ server <- function(input, output) {
         
       }
       
+      
+      ## Add HistoryTemp with HistoryRunning
+      
+      HistoryTemp$GrantNum <- paste("Grant", g, sep="")
+      HistoryRunning <- rbind(HistoryRunning, HistoryTemp)
+      HistoryTemp <- subset (HistoryTemp, select = -GrantNum) # Remove GrantNumber since we're also using history temp to combine with HistoryAllEquity
+      
+      ## Merge the HistoryTemp with HistoryAllEquity
+      
       # Rename the columns based on the grant number
       colnames(HistoryTemp) <- c("DaysAll",  paste("GrantVested", g, sep="") , paste("GrantUnvested", g, sep="" ))
       
@@ -231,39 +242,42 @@ server <- function(input, output) {
       
     }
 
-    hist(HistoryAllEquity$GrantVested1)
-
-    return(HistoryAllEquity)
     
-  })
-  
-  output$distPlot <- renderPlot({
+##### Create a chart ######
+
     
-    #chartSeries(HistoryAllEquity, theme = chartTheme("white"),
-    #            type = "line", "log.scale = input$log, TA = NULL")
     
-    #plot(as.formula(HistoryAllEquity()))
-    hist(HistoryAllEquity$GrantVested1)
+    ggplot(HistoryRunning, aes(x=DaysAll, y = Vested, fill=(GrantNum), alpha = 0.5)) +
+      geom_area(aes(color=factor(GrantNum)), position = position_stack(reverse = TRUE)) +
+      ggtitle("Vesting Chart") +
+      xlab("") + ylab ("Equity Units") +
+      theme(legend.position="none",
+            axis.text.x=element_text(angle=50, size=10, vjust=0.25, ),
+            axis.title.x = element_text(color="darkgrey", vjust=-0.35),
+            axis.title.y = element_text(color="darkgrey", vjust=-0.35),
+            plot.title = element_text(size=20, face="bold", margin = margin(10, 0, 10, 0))
+            ) 
+      
+
     
-  })
-  
-}
+    
+    
+    #p + geom_area(aes(y = GrantUnvested1), position = 'stack') 
 
-shinyApp(ui, server)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+#   return(HistoryAllEquity)
+# 
+# })
+# 
+#   output$distPlot <- renderPlot({
+# 
+#     chartSeries(HistoryAllEquity, theme = chartTheme("white"),
+#                 type = "line", "log.scale = input$log, TA = NULL")
+# 
+#   })
+# 
+# }
+# 
+# shinyApp(ui, server)
+# 
 
 
