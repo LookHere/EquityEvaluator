@@ -18,6 +18,8 @@ To solve both issues this method pulls in the raw equity grant amounts (which HR
 <kbd><img src="https://github.com/LookHere/EquityEvaluator/blob/main/images/CompensaitonGoogleSheetsChart.png" width=100% height=100%></kbd>
 
 
+You can see how different company growth estimates change the equity value over time by altering the [google sheet](https://docs.google.com/spreadsheets/d/1y0_Dwj__GA8JT_QmRCuoBqieL2lw25OVv9WY_L9nKng/edit#gid=253362147).  Try changing the green highlighted cell for high growth, low growth, or even negative growth. 
+
 The major downside of implementing this in an excel-like format is that (generally) a new workbook would need to be built for each employee with their specific data.  It’s possible to be build something that’s more salable, but with this technology it’s challenging to move confidential data so that only the employee has access to there own information.   Another problem is that the calculations are done by month, which make things like the cliff vesting payment look a bit off (there is a slope over a full month when it should be paid over just in one day).
 
 # R model 
