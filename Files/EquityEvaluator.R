@@ -1,4 +1,4 @@
-# This is version 13.  For the most up to date version, go here: https://github.com/LookHere/EquityEvaluator
+# This is version 14.  For the most up to date version, go here: https://github.com/LookHere/EquityEvaluator
 
 
 library(shiny)
@@ -116,9 +116,9 @@ GrantDate <- as.Date(c("2018-01-01", "2020-01-01", "2021-06-01"))
 GrantUnits <- c(1000, 200, 300)
 GrantPeriodM <- c(48, 12, 12)  # the grant period in months (including the vest)
 GrantCliffM <- c(12, 0, 0)     # the vest period in months
+GrantStrike <- c(2.24, 4.15, 22.12) # the strike price for each vest
 
-
-GrantInfo <- data.frame(GrantDate, GrantUnits, GrantPeriodM, GrantCliffM)
+GrantInfo <- data.frame(GrantDate, GrantUnits, GrantPeriodM, GrantCliffM, GrantStrike)
 
 
 ##### Create a dataframe that takes the grant information and expands them over the life of the grant
@@ -244,9 +244,7 @@ while(g<4){
 }
 
 
-##### Create a graph ######
-
-
+##### Create a graph of vested units ######
 
 ggplot(HistoryRunning, aes(x=DaysAll, y = Vested, fill=(GrantNum), alpha = 0.5)) +
   geom_area(aes(color=factor(GrantNum)), position = position_stack(reverse = TRUE)) +
@@ -260,7 +258,18 @@ ggplot(HistoryRunning, aes(x=DaysAll, y = Vested, fill=(GrantNum), alpha = 0.5))
   ) 
 
 
-##### Create a chart ####
+
+
+##### Create a graph of vested, unvested, and cost to exercise ######
+
+
+#add all vested together
+#then add all unvested on top of that
+
+
+
+
+##### Create a chart #### - doesn't work?
 
 # Create columns for the year and month
 HistoryAllEquity$Year <- strftime(HistoryAllEquity$DaysAll, "%Y") 
@@ -268,8 +277,8 @@ HistoryAllEquity$Month <- strftime(HistoryAllEquity$DaysAll, "%m")
 
 # Aggregate data so there is one line for each year/month
 VestingChartMonth <- aggregate( cbind(GrantVested1,GrantUnvested1,GrantVested2,GrantUnvested2,GrantVested3,GrantUnvested3 ) ~ Year + Month,       
-                            HistoryAllEquity,
-                            FUN = mean)
+                                HistoryAllEquity,
+                                FUN = mean)
 
 # Order the dataframe by year and month
 VestingChartMonth <- VestingChart[order(VestingChart$Month, decreasing = FALSE), ]  
@@ -277,8 +286,8 @@ VestingChartMonth <- VestingChart[order(VestingChart$Year, decreasing = FALSE), 
 
 # Create a vesting chart by year with the average units per year
 VestingChartYear <- aggregate( cbind(GrantVested1,GrantUnvested1,GrantVested2,GrantUnvested2,GrantVested3,GrantUnvested3 ) ~ Year,       
-                                HistoryAllEquity,
-                                FUN = mean)
+                               HistoryAllEquity,
+                               FUN = mean)
 
 
 #   return(HistoryAllEquity)
@@ -295,4 +304,3 @@ VestingChartYear <- aggregate( cbind(GrantVested1,GrantUnvested1,GrantVested2,Gr
 # }
 # 
 # shinyApp(ui, server)
-# 
