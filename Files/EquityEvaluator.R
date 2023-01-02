@@ -1,6 +1,5 @@
 # This is version 14.  For the most up to date version, go here: https://github.com/LookHere/EquityEvaluator
 
-
 library(shiny)
 library(ggplot2)
 
@@ -120,7 +119,6 @@ GrantStrike <- c(2.24, 4.15, 22.12) # the strike price for each vest
 
 GrantInfo <- data.frame(GrantDate, GrantUnits, GrantPeriodM, GrantCliffM, GrantStrike)
 
-
 ##### Create a dataframe that takes the grant information and expands them over the life of the grant
 
 # Find the earliest date the earliest grant (this will be the start of the dataframe)
@@ -147,7 +145,7 @@ HistoryRunning$GrantNum <- 0
 
 g = 1 # temporary placeholder for which grant this will process
 
-while(g<4){
+while(g<=length(GrantUnits)){
   
   # Builds a dataframe "HistoryTemp" for every day between the grant issuance and 10 years after the last grant
   DaysAll <- seq(GrantInfo$GrantDate[g],LatestDate, by = "1 day")
@@ -243,6 +241,8 @@ while(g<4){
   
 }
 
+# Bring g back to the number of grants
+g <- g-1
 
 ##### Create a graph of vested units ######
 
@@ -262,6 +262,12 @@ ggplot(HistoryRunning, aes(x=DaysAll, y = Vested, fill=(GrantNum), alpha = 0.5))
 
 ##### Create a graph of vested, unvested, and cost to exercise ######
 
+VestedSum <- c(2,4,6)
+UnvestedSum <- c(3,5,7)
+
+HistoryAllEquity$VestedSum <- rowSums(HistoryAllEquity[ , VestedSum], na.rm=TRUE)
+HistoryAllEquity$UnvestedSum <- rowSums(HistoryAllEquity[ , UnvestedSum], na.rm=TRUE)
+HistoryAllEquity$AllUnitsSum <- rowSums(HistoryAllEquity[ , c(8,9)], na.rm=TRUE)
 
 #add all vested together
 #then add all unvested on top of that
