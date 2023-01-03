@@ -1,4 +1,4 @@
-# This is version 14.  For the most up to date version, go here: https://github.com/LookHere/EquityEvaluator
+# This is version 15.  For the most up to date version, go here: https://github.com/LookHere/EquityEvaluator
 
 library(shiny)
 library(ggplot2)
@@ -254,13 +254,15 @@ ggplot(HistoryRunning, aes(x=DaysAll, y = Vested, fill=(GrantNum), alpha = 0.5))
         axis.text.x=element_text(angle=50, size=10, vjust=0.25, ),
         axis.title.x = element_text(color="darkgrey", vjust=-0.35),
         axis.title.y = element_text(color="darkgrey", vjust=-0.35),
-        plot.title = element_text(size=20, face="bold", margin = margin(10, 0, 10, 0))
+        plot.title = element_text(size=20, face="bold", margin = margin(10, 0, 10, 0)),
+        panel.background = element_rect(fill = 'white', color = 'white'),
+        panel.grid.major = element_line(color = 'grey', size = .5),
+        panel.grid.minor = element_line(color = 'grey', linetype = 'dotted')
   ) 
 
 
-
-
-##### Create a graph of vested, unvested, and cost to exercise ######
+##### Create a graph of vested and unvested ######
+## This is useful for HR to know when someone will have few or no vested unites left (and may need a refresher grant)
 
 VestedSum <- c(2,4,6)
 UnvestedSum <- c(3,5,7)
@@ -268,10 +270,25 @@ UnvestedSum <- c(3,5,7)
 HistoryAllEquity$VestedSum <- rowSums(HistoryAllEquity[ , VestedSum], na.rm=TRUE)
 HistoryAllEquity$UnvestedSum <- rowSums(HistoryAllEquity[ , UnvestedSum], na.rm=TRUE)
 HistoryAllEquity$AllUnitsSum <- rowSums(HistoryAllEquity[ , c(8,9)], na.rm=TRUE)
+  
+ggplot(HistoryAllEquity, aes(x = DaysAll)) + 
+  geom_line(aes(y = VestedSum, color = 'Vested Units'), size=1.25) + 
+  geom_line(aes(y = UnvestedSum, color = 'Unvested Units'), size=1.25, linetype = 1) +
+  ggtitle("Equity Units (Vested and Total)") +
+    xlab("") + ylab ("Shares") +
+  theme(legend.position="bottom",
+        legend.title = element_blank(),
+        axis.text.x=element_text(angle=50, size=10, vjust=0.25, ),
+        axis.title.x = element_text(color="darkgrey", vjust=-0.35),
+        axis.title.y = element_text(color="darkgrey", vjust=-0.35),
+        plot.title = element_text(size=20, face="bold", margin = margin(10, 0, 10, 0)),
+        panel.background = element_rect(fill = 'white', color = 'white'),
+        panel.grid.major = element_line(color = 'grey', size = .5),
+        panel.grid.minor = element_line(color = 'grey', linetype = 'dotted')
+  ) 
+  
 
-#add all vested together
-#then add all unvested on top of that
-
+##### Create a graph of vested, unvested, and cost to exercise ######
 
 
 
