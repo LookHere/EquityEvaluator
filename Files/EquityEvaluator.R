@@ -1,4 +1,4 @@
-# This is version 15.  For the most up to date version, go here: https://github.com/LookHere/EquityEvaluator
+# This is version 16.  For the most up to date version, go here: https://github.com/LookHere/EquityEvaluator
 
 library(shiny)
 library(ggplot2)
@@ -139,6 +139,7 @@ rm(DaysAll)
 HistoryRunning <- HistoryAllEquity
 HistoryRunning$Vested <- 0
 HistoryRunning$Unvested <- 0
+HistoryRunning$Strike <- 0
 HistoryRunning$GrantNum <- 0
 
 #### Creates a function that creates temporary dataframe of one specific grant's vesting and integrate that into the HistoryAllEquity 
@@ -201,25 +202,22 @@ while(g<=length(GrantUnits)){
     HistoryTemp$Vested[MStartRow:MEndRow] <- TempVested
     HistoryTemp$Unvested[MStartRow:MEndRow] <- TempUnvested
     
-    
     # Update the vested amounts for the next month
     TempVested = TempVested + VestPerMonth
     TempUnvested  = TempUnvested - VestPerMonth
-    
     
     # Progress MStart to the next month
     MStart <- as.POSIXlt.Date(GrantInfo$GrantDate[g])
     MStart$mon <- MStart$mon + TempMonth
     
-    
     # Progress the month count
     TempMonth <- TempMonth + 1    
-    
   }
   
+  # Create the strike cost for each vested unit
+  HistoryTemp$Strike <- HistoryTemp$Vested * GrantInfo$GrantStrike[g]
   
   ## Add HistoryTemp with HistoryRunning
-  
   HistoryTemp$GrantNum <- paste("Grant", g, sep="")
   HistoryRunning <- rbind(HistoryRunning, HistoryTemp)
   HistoryTemp <- subset (HistoryTemp, select = -GrantNum) # Remove GrantNumber since we're also using history temp to combine with HistoryAllEquity
@@ -227,7 +225,7 @@ while(g<=length(GrantUnits)){
   ## Merge the HistoryTemp with HistoryAllEquity
   
   # Rename the columns based on the grant number
-  colnames(HistoryTemp) <- c("DaysAll",  paste("GrantVested", g, sep="") , paste("GrantUnvested", g, sep="" ))
+  colnames(HistoryTemp) <- c("DaysAll",  paste("GrantVested", g, sep="") , paste("GrantUnvested", g, sep="" ) , paste("GrantStrike", g, sep="" ))
   
   # Merge the temporary dataframe into the HistoryAllEquity dataframe
   HistoryAllEquity <- merge(HistoryAllEquity, HistoryTemp, by.x = "DaysAll", by.y = "DaysAll", all.x = TRUE, all.y = TRUE)
@@ -261,15 +259,29 @@ ggplot(HistoryRunning, aes(x=DaysAll, y = Vested, fill=(GrantNum), alpha = 0.5))
   ) 
 
 
-##### Create a graph of vested and unvested ######
-## This is useful for HR to know when someone will have few or no vested unites left (and may need a refresher grant)
+##### Combine columns to create sums for the graphs #####
 
-VestedSum <- c(2,4,6)
-UnvestedSum <- c(3,5,7)
+# Pulls in the column names
+ColName <- colnames(HistoryAllEquity)
+# Groups columns by their names (ignoring the # at the end)
+VestedSum <- grep("GrantVested", ColName)
+UnvestedSum <- grep("GrantUnvested", ColName)
+StrikeCost <- grep("GrantStrike", ColName)
 
+# Builds new columns based on the unit groups above
 HistoryAllEquity$VestedSum <- rowSums(HistoryAllEquity[ , VestedSum], na.rm=TRUE)
 HistoryAllEquity$UnvestedSum <- rowSums(HistoryAllEquity[ , UnvestedSum], na.rm=TRUE)
-HistoryAllEquity$AllUnitsSum <- rowSums(HistoryAllEquity[ , c(8,9)], na.rm=TRUE)
+HistoryAllEquity$AllUnitsSum <- rowSums(HistoryAllEquity[ , c(VestedSum,UnvestedSum)], na.rm=TRUE)
+
+# Builds new columns based on the valation of the units
+# need to do something here to connect the value of the units to the vested and non vested amounts 
+HistoryAllEquity$VestedValue <- HistoryAllEquity$VestedSum * 1                                            #change one to the value at that time!
+HistoryAllEquity$UnvestedValue <- HistoryAllEquity$UnvestedSum * 1                                        #change one to the value at that time!
+HistoryAllEquity$AllUnitsValue <- rowSums(HistoryAllEquity[ , c(VestedValue,UnvestedValue)], na.rm=TRUE)
+HistoryAllEquity$StrikeCost <- rowSums(HistoryAllEquity[ , StrikeCost], na.rm=TRUE) * -1
+
+##### Create a graph of vested and unvested ######
+## This is useful for HR to know when someone will have few or no vested unites left (and may need a refresher grant)
   
 ggplot(HistoryAllEquity, aes(x = DaysAll)) + 
   geom_line(aes(y = VestedSum, color = 'Vested Units'), size=1.25) + 
@@ -287,10 +299,24 @@ ggplot(HistoryAllEquity, aes(x = DaysAll)) +
         panel.grid.minor = element_line(color = 'grey', linetype = 'dotted')
   ) 
   
-
 ##### Create a graph of vested, unvested, and cost to exercise ######
 
-
+ggplot(HistoryAllEquity, aes(x = DaysAll)) + 
+  geom_line(aes(y = VestedValue, color = 'Vested Value'), size=1.25) + 
+  geom_line(aes(y = AllUnitsValue, color = 'Total Value'), size=1.25) +
+  geom_line(aes(y = StrikeCost, color = 'Cost to Exercise'), size=1.25) +
+  ggtitle("Equity Units (Vested and Total)") +
+  xlab("") + ylab ("Shares") +
+  theme(legend.position="bottom",
+        legend.title = element_blank(),
+        axis.text.x=element_text(angle=50, size=10, vjust=0.25, ),
+        axis.title.x = element_text(color="darkgrey", vjust=-0.35),
+        axis.title.y = element_text(color="darkgrey", vjust=-0.35),
+        plot.title = element_text(size=20, face="bold", margin = margin(10, 0, 10, 0)),
+        panel.background = element_rect(fill = 'white', color = 'white'),
+        panel.grid.major = element_line(color = 'grey', size = .5),
+        panel.grid.minor = element_line(color = 'grey', linetype = 'dotted')
+  ) 
 
 ##### Create a chart #### - doesn't work?
 
