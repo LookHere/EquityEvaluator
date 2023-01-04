@@ -1,4 +1,4 @@
-# This is version 16.  For the most up to date version, go here: https://github.com/LookHere/EquityEvaluator
+# This is version 17.  For the most up to date version, go here: https://github.com/LookHere/EquityEvaluator
 
 library(shiny)
 library(ggplot2)
@@ -318,24 +318,25 @@ ggplot(HistoryAllEquity, aes(x = DaysAll)) +
         panel.grid.minor = element_line(color = 'grey', linetype = 'dotted')
   ) 
 
-##### Create a chart #### - doesn't work?
+##### Create a chart #####
+# This could be useful in printing out or to display on the screen next to the graph
 
 # Create columns for the year and month
 HistoryAllEquity$Year <- strftime(HistoryAllEquity$DaysAll, "%Y") 
 HistoryAllEquity$Month <- strftime(HistoryAllEquity$DaysAll, "%m") 
 
 # Aggregate data so there is one line for each year/month
-VestingChartMonth <- aggregate( cbind(GrantVested1,GrantUnvested1,GrantVested2,GrantUnvested2,GrantVested3,GrantUnvested3 ) ~ Year + Month,       
+VestingChartMonth <- aggregate( cbind(VestedSum,VestedValue,UnvestedSum,UnvestedValue,AllUnitsSum,AllUnitsValue,StrikeCost) ~ Year + Month,       
                                 HistoryAllEquity,
                                 FUN = mean)
 
 # Order the dataframe by year and month
-VestingChartMonth <- VestingChart[order(VestingChart$Month, decreasing = FALSE), ]  
-VestingChartMonth <- VestingChart[order(VestingChart$Year, decreasing = FALSE), ]  
+VestingChartMonth <- VestingChartMonth[order(VestingChartMonth$Month, decreasing = FALSE), ]  
+VestingChartMonth <- VestingChartMonth[order(VestingChartMonth$Year, decreasing = FALSE), ]  
 
 # Create a vesting chart by year with the average units per year
-VestingChartYear <- aggregate( cbind(GrantVested1,GrantUnvested1,GrantVested2,GrantUnvested2,GrantVested3,GrantUnvested3 ) ~ Year,       
-                               HistoryAllEquity,
+VestingChartYear <- aggregate( cbind(VestedSum,VestedValue,UnvestedSum,UnvestedValue,AllUnitsSum,AllUnitsValue,StrikeCost) ~ Year,       
+                               VestingChartMonth,
                                FUN = mean)
 
 
