@@ -2,7 +2,7 @@
 <i> A system to help employees better understand the value of their equity. </i>
 
 # Overview
-I've worked with a lot of CEOs who get very frustrated when their employees don’t appreciate the value of their equity.  I always say that, “Compensation is Communication”.  If someone doesn’t understand the message we’re sending, then we’re doing a bad job sending it.  So I want to explore how we can use storytelling with data to help employees better understand the resources the company is providing to them.
+I've worked with a lot of CEOs who get frustrated when their employees don’t appreciate the value of their equity.  I always say that, “Compensation is Communication”.  If someone doesn’t understand the message we’re sending, then we’re doing a bad job sending it.  So I want to explore how we can use storytelling with data to help employees better understand the resources the company is providing to them.
 
 The goal of this is to develop a system where the employee’s data can be piped into visualizations that help them better realize the value.  These visualizations should be strong enough to stand on their own, but would also be the same tools that the employee’s manager uses at a live year-end meeting or HR would use in analytics.  A consistent visual language will help give everyone the same understanding of the data.
 
